@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block content %}
+
+{% if not current_user.is_authenticated %}
+<div style="text-align: center; padding: 4rem 1rem;">
+    <h1 style="font-size: 3.5rem; margin-bottom: 1rem; color: var(--primary-color);">Secure Your Future with TrustBank
+    </h1>
+    <p style="color: var(--light-text); font-size: 1.25rem; max-width: 700px; margin: 0 auto 3rem;">
+        The gold standard in digital banking. Experience seamless transactions, world-class security, and personalized
+        financial growth.
+    </p>
+
+    <!-- Information Sections -->
+    <div
+        style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem; max-width: 1000px; margin: 0 auto 4rem;">
+        <div class="card" style="padding: 2rem; border: 1px solid #e2e8f0; text-align: left;">
+            <div style="font-size: 2.5rem; margin-bottom: 1rem;">🛡️</div>
+            <h4>Ultimate Security</h4>
+            <p style="color: var(--light-text); font-size: 0.9rem;">Multi-layered encryption and 6-digit PIN
+                verification for every transaction ensure your peace of mind.</p>
+        </div>
+        <div class="card" style="padding: 2rem; border: 1px solid #e2e8f0; text-align: left;">
+            <div style="font-size: 2.5rem; margin-bottom: 1rem;">⚡</div>
+            <h4>Instant Transfers</h4>
+            <p style="color: var(--light-text); font-size: 0.9rem;">Send money to any TrustBank account globally within
+                seconds, with no hidden fees.</p>
+        </div>
+        <div class="card" style="padding: 2rem; border: 1px solid #e2e8f0; text-align: left;">
+            <div style="font-size: 2.5rem; margin-bottom: 1rem;">📈</div>
+            <h4>Personalized Growth</h4>
+            <p style="color: var(--light-text); font-size: 0.9rem;">Tailored savings accounts designed to help you reach
+                your financial goals faster.</p>
+        </div>
+    </div>
+
+    <!-- Call to Action -->
+    <div class="card"
+        style="max-width: 800px; margin: 0 auto; padding: 3rem; background: var(--primary-color); color: white;">
+        <h2 style="margin-bottom: 1rem;">Ready to start your journey?</h2>
+        <p style="opacity: 0.9; margin-bottom: 2rem;">Join thousands of satisfied customers and open your account today.
+        </p>
+        <a href="{{ url_for('register') }}" class="button"
+            style="text-decoration: none; padding: 1rem 3rem; border-radius: 50px; background: white; color: var(--primary-color); font-weight: bold; font-size: 1.1rem; display: inline-block;">Open
+            Account - Click Here</a>
+    </div>
+</div>
+{% else %}
+<div style="text-align:center; padding:4rem 1rem;">
+    <h2>You're signed in</h2>
+    <p style="color:var(--light-text);">Use the Account page to manage your banking.</p>
+    <a href="{{ url_for('account') }}" class="button" style="text-decoration:none; padding:0.75rem 1.25rem; background:var(--primary-color); color:white; border-radius:6px;">Go to Account</a>
+    <a href="{{ url_for('logout') }}" style="margin-left:1rem; color:var(--light-text);">Logout</a>
+</div>
+{% endif %}
+
+<style>
+    .hover-card:hover {
+        transform: translateY(-8px);
+        box-shadow: var(--shadow);
+        border-color: var(--accent-color) !important;
+    }
+
+    .primary-btn {
+        box-shadow: 0 4px 14px 0 rgba(10, 25, 47, 0.3);
+    }
+</style>
+
+{% endblock %}

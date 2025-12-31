@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="auth-container card" style="margin: 4rem auto;">
+    <div class="auth-header">
+        <h2>Create Account</h2>
+        <p style="color: var(--light-text);">Join TrustBank today</p>
+    </div>
+
+    <form method="post" action="{{ url_for('register') }}">
+        <div class="form-group">
+            <label for="name">Full Name</label>
+            <input type="text" name="name" id="name" placeholder="John Doe" required>
+        </div>
+        <div class="form-group">
+            <label for="email">Email Address</label>
+            <input type="email" name="email" id="email" placeholder="name@example.com" required>
+        </div>
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" name="password" id="password" placeholder="••••••••" required>
+        </div>
+        <button type="submit">Sign Up</button>
+    </form>
+
+    <div class="auth-footer">
+        Already have an account? <a href="{{ url_for('login') }}">Log in here</a>
+    </div>
+</div>
+
+{% endblock %}

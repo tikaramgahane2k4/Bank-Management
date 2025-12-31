@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="card" style="max-width:900px; margin:3rem auto; text-align:left;">
+    <h2>Account Opened Successfully</h2>
+    <p style="color:var(--light-text);">Your account <strong>#{{ account.account_number }}</strong> has been created.
+    Below are some important bank details. You can proceed to manage your account from your dashboard.</p>
+
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem; margin-top:1rem;">
+        <div class="card">
+            <h4>Bank Information</h4>
+            <p><strong>{{ bank_info.name }}</strong><br>
+            Head Office: {{ bank_info.head_office }}<br>
+            SWIFT: {{ bank_info.swift }}
+            </p>
+        </div>
+        <div class="card">
+            <h4>Contact & Support</h4>
+            <p>Phone: {{ bank_info.phone }}<br>
+            Email: {{ bank_info.support_email }}</p>
+        </div>
+    </div>
+
+    <div style="margin-top:1.5rem;">
+        <a href="{{ url_for('account_details', account_number=account.account_number) }}" class="button" style="text-decoration:none; padding:0.75rem 1.5rem; background:var(--primary-color); color:white; border-radius:6px;">Go to Account</a>
+        <a href="{{ url_for('index') }}" style="margin-left:1rem; color:var(--light-text);">Return Home</a>
+    </div>
+</div>
+
+{% endblock %}
