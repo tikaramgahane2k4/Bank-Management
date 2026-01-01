@@ -11,29 +11,38 @@
 <body>
     <nav class="navbar">
         <a href="{{ url_for('index') }}" class="brand">
-            <span>🏦</span> TrustBank
+            <span>🛡️</span> TrustBank
         </a>
         <ul class="nav-links">
+            
             {% if current_user.is_authenticated %}
-            <li><a href="{{ url_for('account') }}">Account</a></li>
-            <li><a href="{{ url_for('logout') }}">Logout</a></li>
+            <li><a
+                    href="{{ url_for('account') if not current_user.is_admin else url_for('admin_accounts') }}">Dashboard</a>
+            </li>
+            <li><a href="{{ url_for('logout') }}" class="btn-secondary"
+                    style="padding: 0.5rem 1rem; font-size: 0.85rem;">Logout</a></li>
             {% else %}
-            <li><a href="{{ url_for('login') }}">User Login</a></li>
-            <li><a href="{{ url_for('register') }}">Register</a></li>
+            <li><a href="{{ url_for('login') }}">Login</a></li>
+            <li><a href="{{ url_for('admin_login') }}">Admin</a></li>
+            <li><a href="{{ url_for('register') }}" class="register-btn">Open Account</a></li>
             {% endif %}
         </ul>
     </nav>
 
-    <div class="container">
+    <div class="container" style="margin-top: 2rem; margin-bottom: 4rem;">
         {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
-        {% for category, message in messages %}
-        <div class="alert alert-{{ category }}">{{ message }}</div>
-        {% endfor %}
+        <div class="flash-messages">
+            {% for category, message in messages %}
+            <div class="flash {{ category }}">{{ message }}</div>
+            {% endfor %}
+        </div>
         {% endif %}
         {% endwith %}
 
-        {% block content %}{% endblock %}
+        <main class="animate-up">
+            {% block content %}{% endblock %}
+        </main>
     </div>
 </body>
 

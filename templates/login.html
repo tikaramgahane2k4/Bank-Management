@@ -1,26 +1,36 @@
 {% extends "base.html" %}
 {% block content %}
 
-<div class="auth-container card" style="margin: 4rem auto;">
-    <div class="auth-header">
-        <h2>User Login</h2>
-        <p style="color: var(--light-text);">Log in to manage your accounts</p>
+<div class="auth-container card mx-auto shadow-xl animate-up" style="margin: 4rem auto; max-width: 480px; width: 95%;">
+    <div class="auth-header text-center mb-10">
+        <div
+            class="w-16 h-16 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center text-3xl mx-auto mb-6">
+            🔑</div>
+        <h2 class="text-3xl font-black text-slate-900 tracking-tighter">Welcome Back</h2>
+        <p class="text-slate-500 font-medium">Log in to your secure digital workspace</p>
     </div>
 
     <form method="post" action="{{ url_for('login') }}">
-        <div class="form-group">
-            <label for="email">Email Address</label>
-            <input type="email" name="email" id="email" placeholder="name@example.com" required>
+        <div class="form-group mb-6">
+            <label>Registered Email Address</label>
+            <input type="email" name="email" class="font-bold" placeholder="name@example.com" required>
         </div>
-        <div class="form-group">
-            <label for="password">Password</label>
-            <input type="password" name="password" id="password" placeholder="••••••••" required>
+        <div class="form-group mb-10">
+            <div class="flex justify-between items-center mb-2">
+                <label class="mb-0">Secure Password</label>
+                <a href="{{ url_for('forgot_password') }}"
+                    class="text-xs font-black text-blue-600 hover:underline">Forgot?</a>
+            </div>
+            <input type="password" name="password" class="font-bold" placeholder="••••••••" required>
         </div>
-        <button type="submit">User Login</button>
+        <button type="submit" class="w-full py-4 btn btn-primary text-lg rounded-2xl shadow-lg">
+            Authorize & Sign In →
+        </button>
     </form>
 
-    <div class="auth-footer">
-        Don't have an account? <a href="{{ url_for('register') }}">Sign up here</a>
+    <div class="auth-footer text-center mt-10 pt-8 border-t border-slate-50">
+        <p class="text-sm text-slate-500 font-medium">New to our platform? <a href="{{ url_for('register') }}"
+                class="text-blue-600 font-black hover:underline">Open a free account</a></p>
     </div>
 </div>
 

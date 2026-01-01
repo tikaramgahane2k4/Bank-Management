@@ -1,68 +1,104 @@
 {% extends "base.html" %}
 {% block content %}
 
-{% if not current_user.is_authenticated %}
-<div style="text-align: center; padding: 4rem 1rem;">
-    <h1 style="font-size: 3.5rem; margin-bottom: 1rem; color: var(--primary-color);">Secure Your Future with TrustBank
-    </h1>
-    <p style="color: var(--light-text); font-size: 1.25rem; max-width: 700px; margin: 0 auto 3rem;">
-        The gold standard in digital banking. Experience seamless transactions, world-class security, and personalized
-        financial growth.
-    </p>
-
-    <!-- Information Sections -->
-    <div
-        style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem; max-width: 1000px; margin: 0 auto 4rem;">
-        <div class="card" style="padding: 2rem; border: 1px solid #e2e8f0; text-align: left;">
-            <div style="font-size: 2.5rem; margin-bottom: 1rem;">🛡️</div>
-            <h4>Ultimate Security</h4>
-            <p style="color: var(--light-text); font-size: 0.9rem;">Multi-layered encryption and 6-digit PIN
-                verification for every transaction ensure your peace of mind.</p>
-        </div>
-        <div class="card" style="padding: 2rem; border: 1px solid #e2e8f0; text-align: left;">
-            <div style="font-size: 2.5rem; margin-bottom: 1rem;">⚡</div>
-            <h4>Instant Transfers</h4>
-            <p style="color: var(--light-text); font-size: 0.9rem;">Send money to any TrustBank account globally within
-                seconds, with no hidden fees.</p>
-        </div>
-        <div class="card" style="padding: 2rem; border: 1px solid #e2e8f0; text-align: left;">
-            <div style="font-size: 2.5rem; margin-bottom: 1rem;">📈</div>
-            <h4>Personalized Growth</h4>
-            <p style="color: var(--light-text); font-size: 0.9rem;">Tailored savings accounts designed to help you reach
-                your financial goals faster.</p>
-        </div>
-    </div>
-
-    <!-- Call to Action -->
-    <div class="card"
-        style="max-width: 800px; margin: 0 auto; padding: 3rem; background: var(--primary-color); color: white;">
-        <h2 style="margin-bottom: 1rem;">Ready to start your journey?</h2>
-        <p style="opacity: 0.9; margin-bottom: 2rem;">Join thousands of satisfied customers and open your account today.
+<section class="py-12 text-center overflow-hidden">
+    <!-- Hero Section -->
+    <div class="max-width-800 mx-auto mb-16 px-4">
+        <span
+            class="px-4 py-1.5 rounded-full bg-blue-50 text-blue-600 text-xs font-black uppercase tracking-widest mb-6 inline-block animate-up"
+            style="animation-delay: 0.1s;">The Next Generation of Banking</span>
+        <h1 class="font-black tracking-tighter text-slate-900 mb-6 animate-up"
+            style="font-size: var(--h1); line-height: 1.05; animation-delay: 0.2s;">
+            Banking as <span
+                style="background: var(--accent-gradient); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">Vibrant</span>
+            as Your Ambition
+        </h1>
+        <p class="text-lg text-slate-500 mb-10 animate-up"
+            style="max-width: 650px; margin-left: auto; margin-right: auto; animation-delay: 0.3s;">
+            Experience a world-class financial ecosystem designed for the modern era. Secure, intelligent, and built for
+            your growth.
         </p>
-        <a href="{{ url_for('register') }}" class="button"
-            style="text-decoration: none; padding: 1rem 3rem; border-radius: 50px; background: white; color: var(--primary-color); font-weight: bold; font-size: 1.1rem; display: inline-block;">Open
-            Account - Click Here</a>
+
+        <div class="flex flex-col sm:flex-row justify-center gap-4 animate-up" style="animation-delay: 0.4s;">
+            {% if not current_user.is_authenticated %}
+            <a href="{{ url_for('register') }}" class="btn btn-primary px-10 py-5 text-lg rounded-2xl">Open Your Account
+                🏦</a>
+            <a href="{{ url_for('login') }}" class="btn btn-secondary px-10 py-5 text-lg rounded-2xl">Take a Tour ⚡</a>
+            {% else %}
+            <a href="{{ url_for('account') if not current_user.is_admin else url_for('admin_accounts') }}"
+                class="btn btn-primary px-10 py-5 text-lg rounded-2xl">Return to Workspace →</a>
+            {% endif %}
+        </div>
     </div>
-</div>
-{% else %}
-<div style="text-align:center; padding:4rem 1rem;">
-    <h2>You're signed in</h2>
-    <p style="color:var(--light-text);">Use the Account page to manage your banking.</p>
-    <a href="{{ url_for('account') }}" class="button" style="text-decoration:none; padding:0.75rem 1.25rem; background:var(--primary-color); color:white; border-radius:6px;">Go to Account</a>
-    <a href="{{ url_for('logout') }}" style="margin-left:1rem; color:var(--light-text);">Logout</a>
-</div>
-{% endif %}
 
-<style>
-    .hover-card:hover {
-        transform: translateY(-8px);
-        box-shadow: var(--shadow);
-        border-color: var(--accent-color) !important;
-    }
+    <!-- Features Section -->
+    <div class="mb-20">
+        <h2 class="text-xs font-black text-slate-400 uppercase tracking-[0.3em] mb-12 animate-up">Institutional Grade
+            Features</h2>
+        <div class="grid grid-cols-auto gap-8 animate-up" style="animation-delay: 0.5s;">
+            <div class="card p-10 flex flex-col items-center text-center">
+                <div class="w-16 h-16 rounded-2xl bg-blue-50 flex items-center justify-center text-3xl mb-6">🛡️</div>
+                <h3 class="font-black text-xl text-slate-900 mb-3">Quantum Security</h3>
+                <p class="text-sm text-slate-500 font-medium">Multi-factor biometric verification and 256-bit encryption
+                    for every micro-transaction.</p>
+            </div>
+            <div class="card p-10 flex flex-col items-center text-center">
+                <div class="w-16 h-16 rounded-2xl bg-emerald-50 flex items-center justify-center text-3xl mb-6">⚡</div>
+                <h3 class="font-black text-xl text-slate-900 mb-3">Instant Settlement</h3>
+                <p class="text-sm text-slate-500 font-medium">Move capital globally in milliseconds. No legacy delays,
+                    no intermediary friction.</p>
+            </div>
+            <div class="card p-10 flex flex-col items-center text-center">
+                <div class="w-16 h-16 rounded-2xl bg-amber-50 flex items-center justify-center text-3xl mb-6">📉</div>
+                <h3 class="font-black text-xl text-slate-900 mb-3">Autonomous Wealth</h3>
+                <p class="text-sm text-slate-500 font-medium">Non-custodial insights and automated saving protocols that
+                    work while you sleep.</p>
+            </div>
+        </div>
+    </div>
 
-    .primary-btn {
-        box-shadow: 0 4px 14px 0 rgba(10, 25, 47, 0.3);
-    }
-</style>
+    <!-- Offers Carousel/Grid -->
+    <div class="bg-white p-12 sm:p-20 rounded-[3rem] border border-slate-100 shadow-2xl relative overflow-hidden animate-up"
+        style="animation-delay: 0.6s;">
+        <div class="relative z-10 mb-16">
+            <h2 class="text-4xl font-black text-slate-900 tracking-tight mb-4">Elite Benefits</h2>
+            <p class="text-slate-500 font-medium">Exclusively for TrustBank account holders</p>
+        </div>
+
+        <div class="grid grid-cols-auto gap-8 relative z-10">
+            <div
+                class="bg-slate-50 p-8 rounded-3xl text-left border border-slate-100 group hover:bg-white hover:border-blue-200 transition-all">
+                <span
+                    class="px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full text-[10px] font-black uppercase tracking-widest mb-6 inline-block">Flash
+                    Offer</span>
+                <h4 class="font-black text-2xl text-slate-900 mb-3">5.2% Fixed APY</h4>
+                <p class="text-sm text-slate-500 font-medium leading-relaxed mb-6">Maximize your idle capital with our
+                    highest tier interest rate. Period guaranteed for 12 months.</p>
+                <div class="text-blue-600 font-black text-xs uppercase tracking-widest">Learn More ➔</div>
+            </div>
+            <div
+                class="bg-slate-50 p-8 rounded-3xl text-left border border-slate-100 group hover:bg-white hover:border-blue-200 transition-all">
+                <span
+                    class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-[10px] font-black uppercase tracking-widest mb-6 inline-block">Welcome
+                    Package</span>
+                <h4 class="font-black text-2xl text-slate-900 mb-3">$250 Bonus</h4>
+                <p class="text-sm text-slate-500 font-medium leading-relaxed mb-6">Open a new Premium Current account
+                    and receive $250 after your first recurring deposit.</p>
+                <div class="text-blue-600 font-black text-xs uppercase tracking-widest">Enroll Now ➔</div>
+            </div>
+            <div
+                class="bg-slate-50 p-8 rounded-3xl text-left border border-slate-100 group hover:bg-white hover:border-blue-200 transition-all">
+                <span
+                    class="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-[10px] font-black uppercase tracking-widest mb-6 inline-block">Privilege</span>
+                <h4 class="font-black text-2xl text-slate-900 mb-3">Lounge Access</h4>
+                <p class="text-sm text-slate-500 font-medium leading-relaxed mb-6">Complimentary access to over 1,200
+                    airport lounges worldwide for Premium Tier members.</p>
+                <div class="text-blue-600 font-black text-xs uppercase tracking-widest">View Map ➔</div>
+            </div>
+        </div>
+        <div class="absolute top-0 right-0 w-96 h-96 bg-blue-50 rounded-full -mr-48 -mt-48 opacity-50"></div>
+        <div class="absolute bottom-0 left-0 w-64 h-64 bg-emerald-50 rounded-full -ml-32 -mb-32 opacity-50"></div>
+    </div>
+</section>
 
 {% endblock %}

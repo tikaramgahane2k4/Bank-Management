@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="card shadow-xl mx-auto animate-up"
+    style="max-width: 800px; width: 95%; margin: 4rem auto; border-top: 5px solid var(--accent-color);">
+    <div class="mb-10 text-center md:text-left">
+        <span
+            class="px-4 py-1.5 rounded-full bg-blue-50 text-blue-600 text-[10px] font-black uppercase tracking-widest mb-4 inline-block">Administrative
+            Asset Configuration</span>
+        <h2 class="text-3xl font-black text-slate-900 tracking-tighter mb-2">Configure Account #{{
+            account.account_number }}</h2>
+        <p class="text-slate-500 font-medium text-sm">Strategic modification of account parameters and ownership</p>
+    </div>
+
+    <form method="post" action="">
+        <div class="grid grid-cols-auto gap-8 mb-10">
+            <div class="form-group mb-0"><label>Account ID (Read-only)</label><input type="text"
+                    value="{{ account.account_number }}" readonly class="bg-slate-100 font-mono font-bold" /></div>
+            <div class="form-group mb-0"><label>Owner Identification (Email)</label><input type="email"
+                    name="owner_email" value="{{ account.user.email }}" class="font-bold" /></div>
+            <div class="form-group mb-0"><label>Asset Categorization</label><input type="text" name="account_type"
+                    value="{{ account.account_type or 'Savings' }}" class="font-bold" /></div>
+            <div class="form-group mb-0"><label>Assigned Branch Portal</label><input type="text" name="branch"
+                    value="{{ account.branch or 'Main Digital' }}" class="font-bold" /></div>
+            <div class="form-group mb-0">
+                <label>Operational Status</label>
+                <select name="status" class="font-bold">
+                    <option value="active" {% if account.status=='active' %}selected{% endif %}>🟢 Active & Liquid
+                    </option>
+                    <option value="closed" {% if account.status=='closed' %}selected{% endif %}>🔴 Closed / Archived
+                    </option>
+                    <option value="suspended" {% if account.status=='suspended' %}selected{% endif %}>🟡 Suspended
+                    </option>
+                </select>
+            </div>
+            <div class="form-group mb-0"><label>Liquid Valuation (USD)</label><input type="number" step="0.01"
+                    name="balance" value="{{ " %.2f"|format(account.balance) }}"
+                    class="font-black text-xl text-blue-600" /></div>
+        </div>
+
+        <div class="flex flex-col sm:flex-row items-center gap-4">
+            <button type="submit" class="w-full sm:flex-1 py-4 btn btn-primary text-lg rounded-2xl shadow-xl">
+                Commit Changes ➔
+            </button>
+            <a href="{{ url_for('admin_accounts') }}" class="w-full sm:w-auto px-8 py-4 btn btn-secondary rounded-2xl">
+                Discard
+            </a>
+        </div>
+    </form>
+</div>
+
+{% endblock %}

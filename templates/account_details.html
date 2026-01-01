@@ -1,75 +1,124 @@
 {% extends "base.html" %}
 {% block content %}
 
-<div class="header-section" style="margin-bottom: 2rem; display:flex; justify-content:space-between; align-items:start;">
-    <div>
-        <h1>Account #{{ account.account_number }}</h1>
-        <p style="color:var(--light-text);">Owner: {{ user.name }}</p>
-    </div>
-    <div class="card" style="margin:0; padding:1rem; text-align:right; background: #f8fafc;">
-        <small style="display:block; color:var(--light-text); font-weight:600;">Current Balance</small>
-        <div style="font-size:1.8rem; font-weight:700; color:var(--primary-color);">${{ "%.2f"|format(account.balance) }}</div>
-    </div>
-</div>
-
-<div style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem; max-width:1000px; margin:0 auto;">
-    <div class="card">
-        <h3>Deposit</h3>
-        <form method="post" action="{{ url_for('deposit') }}">
-            <input type="hidden" name="account_number" value="{{ account.account_number }}" />
-            <div class="form-group">
-                <label>Amount</label>
-                <input type="number" name="amount" step="0.01" required />
-            </div>
-            <div class="form-group">
-                <label>PIN (if set)</label>
-                <input type="password" name="pin" maxlength="6" />
-            </div>
-            <button type="submit">Deposit</button>
-        </form>
-    </div>
-
-    <div class="card">
-        <h3>Transfer</h3>
-        <form method="post" action="{{ url_for('transfer') }}">
-            <input type="hidden" name="from_account" value="{{ account.account_number }}" />
-            <div class="form-group">
-                <label>Recipient Account Number</label>
-                <input type="text" name="to_account" required />
-            </div>
-            <div class="form-group">
-                <label>Amount</label>
-                <input type="number" name="amount" step="0.01" required />
-            </div>
-            <div class="form-group">
-                <label>PIN (if set)</label>
-                <input type="password" name="pin" maxlength="6" />
-            </div>
-            <button type="submit" style="background:var(--primary-color);">Transfer</button>
-        </form>
-    </div>
-</div>
-
-<div class="card" style="max-width:1000px; margin:1rem auto;">
-    <h3>Recent Transactions</h3>
-    {% if transactions %}
-    <div style="max-height:300px; overflow-y:auto;">
-        {% for tx in transactions %}
-        <div style="display:flex; justify-content:space-between; padding:0.75rem; border-bottom:1px solid var(--bg-color);">
-            <div>
-                <strong>{{ tx.type|capitalize }}</strong>
-                <div style="color:var(--light-text); font-size:0.9rem;">{{ tx.created_at.strftime('%Y-%m-%d %H:%M') }}</div>
-            </div>
-            <div style="text-align:right;">
-                <strong>${{ "%.2f"|format(tx.amount) }}</strong>
-                <div style="color:var(--light-text); font-size:0.9rem;">{% if tx.from_account %}{{ tx.from_account }} ➔ {% endif %}{{ tx.to_account }}</div>
-            </div>
+<div class="flex flex-col gap-10 animate-up">
+    <!-- Header with Balance -->
+    <div
+        class="flex flex-col lg:flex-row justify-between items-start lg:items-center bg-white p-8 md:p-10 rounded-[2.5rem] border border-slate-100 shadow-sm relative overflow-hidden gap-8">
+        <div class="relative z-10 w-full lg:w-auto">
+            <span
+                class="px-3 py-1 rounded-full bg-blue-50 text-blue-600 text-[10px] font-black uppercase tracking-widest mb-4 inline-block">Account
+                Master View</span>
+            <h1 class="font-black text-slate-900 tracking-tighter mb-2" style="font-size: var(--h2);">Account #{{
+                account.account_number }}</h1>
+            <p class="text-slate-500 font-medium">Primary Holder: <span class="text-slate-900 font-bold">{{ user.name
+                    }}</span> • {{ account.account_type|default('Savings') }}</p>
         </div>
-        {% endfor %}
+        <div class="text-left lg:text-right relative z-10 w-full lg:w-auto">
+            <div class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Available Liquid Balance
+            </div>
+            <div class="font-black text-slate-900 tracking-tighter" style="font-size: var(--h1); line-height: 1;">${{
+                "%.2f"|format(account.balance) }}</div>
+        </div>
+        <div class="absolute top-0 right-0 w-64 h-64 bg-slate-50 rounded-full -mr-32 -mt-32 opacity-40"></div>
     </div>
-    {% else %}
-    <p style="color:var(--light-text);">No recent transactions.</p>
-    {% endif %}
+
+    <!-- Actions Grid -->
+    <div class="grid grid-cols-auto gap-8">
+        <!-- Deposit -->
+        <div class="card p-8 md:p-10 border-emerald-50 shadow-md">
+            <div class="flex items-center gap-4 mb-8">
+                <div
+                    class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-2xl">
+                    📥</div>
+                <div>
+                    <h3 class="text-xl font-black mb-0">Deposit Funds</h3>
+                    <p class="text-slate-500 text-sm font-medium">Add liquidity instantly</p>
+                </div>
+            </div>
+            <form method="post" action="{{ url_for('deposit') }}">
+                <input type="hidden" name="account_number" value="{{ account.account_number }}" />
+                <div class="form-group"><label>Amount (USD)</label><input type="number" name="amount" step="0.01"
+                        class="font-bold text-lg" placeholder="0.00" required /></div>
+                <div class="form-group"><label>Security PIN</label><input type="password" name="pin" maxlength="6"
+                        class="font-mono text-center tracking-[0.5em] text-xl" placeholder="••••••" required /></div>
+                <button type="submit" class="w-full py-4 btn btn-primary font-black shadow-lg">Authorize
+                    Deposit</button>
+            </form>
+        </div>
+
+        <!-- Transfer -->
+        <div class="card p-8 md:p-10 border-blue-50 shadow-md">
+            <div class="flex items-center gap-4 mb-8">
+                <div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-2xl">📤
+                </div>
+                <div>
+                    <h3 class="text-xl font-black mb-0">Secure Transfer</h3>
+                    <p class="text-slate-500 text-sm font-medium">To any TrustBank account</p>
+                </div>
+            </div>
+            <form method="post" action="{{ url_for('transfer') }}">
+                <input type="hidden" name="from_account" value="{{ account.account_number }}" />
+                <div class="form-group"><label>Recipient Account Number</label><input type="text" name="to_account"
+                        class="font-mono font-bold" placeholder="E.g. 12345678" required /></div>
+                <div class="form-group"><label>Amount (USD)</label><input type="number" name="amount" step="0.01"
+                        class="font-bold text-lg" placeholder="0.00" required /></div>
+                <div class="form-group"><label>Security PIN</label><input type="password" name="pin" maxlength="6"
+                        class="font-mono text-center tracking-[0.5em] text-xl" placeholder="••••••" required /></div>
+                <button type="submit" class="w-full py-4 btn btn-primary font-black shadow-lg"
+                    style="background: var(--primary-color);">Execute Transfer →</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Transactions Section -->
+    <div class="card p-8 md:p-10 shadow-sm border-slate-50">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-10 gap-4">
+            <div>
+                <h3 class="text-2xl font-black text-slate-900 tracking-tight mb-1">Transaction Ledger</h3>
+                <p class="text-slate-500 font-medium text-sm">Audited record of recent activity</p>
+            </div>
+            <span
+                class="px-3 py-1.5 rounded-full bg-slate-100 text-slate-600 text-[10px] font-black uppercase tracking-widest">Live
+                Updates</span>
+        </div>
+
+        {% if transactions %}
+        <div class="flex flex-col">
+            {% for tx in transactions %}
+            <div
+                class="flex flex-col sm:flex-row justify-between items-start sm:items-center py-6 border-b border-slate-50 last:border-0 hover:bg-slate-50 -mx-4 px-4 rounded-xl transition-all gap-4">
+                <div class="flex items-center gap-4">
+                    <div
+                        class="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl bg-white shadow-sm border border-slate-100">
+                        {% if tx.type == 'deposit' %} 🏦 {% elif tx.type == 'transfer' %} 💸 {% else %} 📄 {% endif %}
+                    </div>
+                    <div>
+                        <div class="font-black text-slate-900">{{ tx.type|capitalize }}</div>
+                        <div class="text-[10px] font-bold text-slate-400 mt-0.5">{{ tx.created_at.strftime('%b %d, %Y •
+                            %H:%M') }}</div>
+                    </div>
+                </div>
+                <div class="text-left sm:text-right w-full sm:w-auto">
+                    <div
+                        class="text-lg font-black {% if tx.type == 'deposit' %} text-emerald-600 {% else %} text-slate-900 {% endif %}">
+                        {% if tx.type == 'deposit' %}+{% else %}-{% endif %}${{ "%.2f"|format(tx.amount) }}
+                    </div>
+                    <div class="text-[10px] font-bold text-slate-400 mt-0.5 font-mono">
+                        {% if tx.from_account %}FR: {{ tx.from_account }} ➔ {% endif %}TO: {{ tx.to_account }}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-16 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+            <div class="text-5xl mb-6">📜</div>
+            <p class="text-slate-500 font-bold text-lg">Transaction history is empty</p>
+            <p class="text-slate-400 text-sm">Initiate a deposit or transfer to begin activity.</p>
+        </div>
+        {% endif %}
+    </div>
 </div>
 
 {% endblock %}

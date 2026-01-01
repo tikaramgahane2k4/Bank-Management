@@ -26,6 +26,16 @@ def profile_complete_required(f):
     return decorated_function
 
 
+def admin_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        if not current_user.is_authenticated or not getattr(current_user, 'is_admin', False):
+            flash("Admin access required.", "error")
+            return redirect(url_for('index'))
+        return f(*args, **kwargs)
+    return decorated
+
+
 with app.app_context():
     try:
         db.create_all()
@@ -73,12 +83,34 @@ with app.app_context():
     except Exception as e:
         print("Warning: migration check failed:", e)
 
+    # Ensure there is a default admin user for initial access
+    try:
+        admin_email = 'admin@trustbank.local'
+        admin = User.query.filter_by(email=admin_email).first()
+        if not admin:
+            admin = User(name='Administrator', email=admin_email, username='admin')
+            admin.set_password('adminpass')
+            admin.is_admin = True
+            db.session.add(admin)
+            db.session.commit()
+            print('Created default admin:', admin_email)
+    except Exception as e:
+        print('Warning: could not ensure default admin:', e)
+
 
 # ------- Authentication -------
 
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
+    if current_user.is_authenticated:
+        # If user is logged in and already has an account, redirect to dashboard
+        if Account.query.filter_by(user_id=current_user.id).first():
+            return redirect(url_for("account"))
+        # If logged in but no account, let them stay (they might be on the onboarding form)
+        # But register page is for new Users. For existing users without accounts, we show form on /account.
+        return redirect(url_for("account"))
+
     if request.method == "POST":
         name = request.form.get("name")
         email = request.form.get("email")
@@ -89,15 +121,15 @@ def register():
             return redirect(url_for("register"))
 
         if User.query.filter_by(email=email).first():
-            flash("Email already registered", "error")
-            return redirect(url_for("register"))
+            flash("Email already registered. Please login.", "info")
+            return redirect(url_for("login"))
 
         user = User(name=name, email=email)
         user.set_password(password)
         db.session.add(user)
         db.session.commit()
 
-        flash("Registration successful! Please login.", "success")
+        flash("Registration successful! Please login to open your account.", "success")
         return redirect(url_for("login"))
 
     return render_template("register.html")
@@ -105,17 +137,82 @@ def register():
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
+    if current_user.is_authenticated:
+        if current_user.is_admin:
+            return redirect(url_for("admin_accounts"))
+        return redirect(url_for("account"))
+        
     if request.method == "POST":
         email = request.form.get("email")
         password = request.form.get("password")
         user = User.query.filter_by(email=email).first()
 
         if user and user.check_password(password):
+            if user.is_admin:
+                flash("Please use the Admin Login page.", "warning")
+                return redirect(url_for("admin_login"))
             login_user(user)
             return redirect(url_for("account"))
         else:
             flash("Invalid email or password", "error")
     return render_template("login.html")
+
+
+@app.route("/admin/login", methods=["GET", "POST"])
+def admin_login():
+    if current_user.is_authenticated and current_user.is_admin:
+        return redirect(url_for("admin_accounts"))
+        
+    if request.method == "POST":
+        email = request.form.get("email")
+        password = request.form.get("password")
+        user = User.query.filter_by(email=email).first()
+
+        if user and user.check_password(password) and user.is_admin:
+            login_user(user)
+            return redirect(url_for("admin_accounts"))
+        else:
+            flash("Invalid admin credentials", "error")
+    return render_template("admin_login.html")
+
+
+@app.route("/forgot-password", methods=["GET", "POST"])
+def forgot_password():
+    if current_user.is_authenticated:
+        return redirect(url_for("account"))
+        
+    if request.method == "POST":
+        email = request.form.get("email")
+        user = User.query.filter_by(email=email).first()
+        if user:
+            # In a real app, send an email. Here we redirect to reset page for demo.
+            flash("Account identified. Please set your new password.", "info")
+            return redirect(url_for("reset_password", user_id=user.id))
+        else:
+            flash("Email not found.", "error")
+    return render_template("forgot_password.html")
+
+
+@app.route("/reset-password/<int:user_id>", methods=["GET", "POST"])
+def reset_password(user_id):
+    if current_user.is_authenticated:
+        return redirect(url_for("account"))
+        
+    user = User.query.get_or_404(user_id)
+    if request.method == "POST":
+        password = request.form.get("password")
+        confirm_password = request.form.get("confirm_password")
+        
+        if password != confirm_password:
+            flash("Passwords do not match.", "error")
+            return redirect(url_for("reset_password", user_id=user_id))
+            
+        user.set_password(password)
+        db.session.commit()
+        flash("Password reset successful. Please login.", "success")
+        return redirect(url_for("login"))
+        
+    return render_template("reset_password.html", user_id=user_id)
 
 
 @app.route("/logout")
@@ -213,9 +310,11 @@ def open_account():
             account_number = str(random.randint(10000000, 99999999))
 
     # prevent duplicate accounts for same user
-    if Account.query.filter_by(user_id=current_user.id).first():
-        flash("You already have an account.", "info")
-        return redirect(url_for('account'))
+    # Interpret "add another" as allowing multiple accounts (limit 5)
+    existing_accounts_count = Account.query.filter_by(user_id=current_user.id).count()
+    if existing_accounts_count >= 5:
+        flash("You have reached the maximum limit of 5 accounts.", "warning")
+        return redirect(url_for("account"))
 
     new_account = Account(user_id=current_user.id, account_number=account_number, balance=0.0, status='active', account_type=account_type, branch=branch)
     db.session.add(new_account)
@@ -230,6 +329,81 @@ def account_details(account_number):
     account = Account.query.filter_by(account_number=account_number, user_id=current_user.id).first_or_404()
     transactions = Transaction.query.filter((Transaction.from_account == account_number) | (Transaction.to_account == account_number)).order_by(Transaction.created_at.desc()).all()
     return render_template("account_details.html", user=current_user, account=account, transactions=transactions)
+
+
+# ------- Admin -------
+
+
+@app.route('/admin/accounts')
+@login_required
+@admin_required
+def admin_accounts():
+    # show all accounts with owner info
+    accounts = Account.query.order_by(Account.id.desc()).all()
+    return render_template('admin_accounts.html', accounts=accounts)
+
+
+@app.route('/admin/account/delete', methods=['POST'])
+@login_required
+@admin_required
+def admin_delete_account():
+    acc_num = request.form.get('account_number')
+    if not acc_num:
+        flash('Account number required.', 'error')
+        return redirect(url_for('admin_accounts'))
+
+    account = Account.query.filter_by(account_number=acc_num).first()
+    if not account:
+        flash('Account not found.', 'error')
+        return redirect(url_for('admin_accounts'))
+
+    # Remove related transactions (optional)
+    try:
+        Transaction.query.filter((Transaction.from_account == acc_num) | (Transaction.to_account == acc_num)).delete(synchronize_session=False)
+        db.session.delete(account)
+        db.session.commit()
+        flash(f'Account {acc_num} deleted.', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash('Could not delete account: ' + str(e), 'error')
+
+    return redirect(url_for('admin_accounts'))
+
+
+@app.route('/admin/account/<account_number>/edit', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def admin_edit_account(account_number):
+    account = Account.query.filter_by(account_number=account_number).first_or_404()
+    if request.method == 'POST':
+        status = request.form.get('status')
+        account_type = request.form.get('account_type')
+        branch = request.form.get('branch')
+        balance = request.form.get('balance')
+        owner_email = request.form.get('owner_email')
+        try:
+            if status:
+                account.status = status
+            if account_type:
+                account.account_type = account_type
+            if branch is not None:
+                account.branch = branch
+            if balance:
+                account.balance = float(balance)
+            if owner_email:
+                user = User.query.filter_by(email=owner_email).first()
+                if user:
+                    account.user_id = user.id
+            db.session.add(account)
+            db.session.commit()
+            flash(f'Account {account_number} updated.', 'success')
+            return redirect(url_for('admin_accounts'))
+        except Exception as e:
+            db.session.rollback()
+            flash('Could not update account: ' + str(e), 'error')
+            return redirect(url_for('admin_edit_account', account_number=account_number))
+
+    return render_template('admin_edit_account.html', account=account)
 
 
 @app.route("/account/created/<account_number>")
